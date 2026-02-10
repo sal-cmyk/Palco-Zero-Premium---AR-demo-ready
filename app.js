@@ -7,14 +7,33 @@
     'use strict';
 
     // Configuration
-    const APP_CONFIG = {
-        product: {
-            name: 'Produto Premium',
-            subtitle: 'Experiência em Realidade Aumentada',
-            description: 'Explore este produto em AR diretamente no seu ambiente. Posicione, dimensione e visualize antes de comprar.',
-            glbPath: './models/product.glb',
-            usdzPath: './models/product.usdz'
+    // SKU Configuration
+    const PRODUCTS = {
+        'can': {
+            name: 'NEON FLOW',
+            subtitle: 'Bebida Energética Premium',
+            description: 'Refrescância. Identidade. Canal vivo.',
+            glbPath: './models/can.glb',
+            usdzPath: './models/can.usdz',
+            posterPath: './models/can-poster.webp'
         },
+        'cookie-pack': {
+            name: 'Biscoito Premium',
+            subtitle: 'Crocância. Sabor. Experiência viva.',
+            description: 'Ingredientes em destaque. Benefícios claros. Conteúdo e receitas.',
+            glbPath: './models/cookie-pack.glb',
+            usdzPath: './models/cookie-pack.usdz',
+            posterPath: './models/cookie-pack-poster.webp'
+        }
+    };
+
+    // Get SKU from URL or default to 'can'
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSKU = urlParams.get('sku') || 'can';
+    const currentProduct = PRODUCTS[currentSKU] || PRODUCTS['can'];
+
+    const APP_CONFIG = {
+        product: currentProduct,
         analytics: {
             enabled: false, // Set to true when implementing analytics
             debugMode: true
