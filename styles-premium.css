@@ -1,0 +1,625 @@
+/* ========================================
+   PALCO ZERO - PREMIUM STYLES
+   Apple-level design with real glassmorphism
+   ======================================== */
+
+:root {
+    /* Color Palette - Subtle & Premium */
+    --color-primary: #000000;
+    --color-secondary: #1d1d1f;
+    --color-tertiary: #86868b;
+    --color-accent: #0071e3;
+    --color-success: #30d158;
+    --color-background: #f5f5f7;
+    
+    /* Glass Effect Variables */
+    --glass-blur: 40px;
+    --glass-opacity: 0.06;
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-shadow: rgba(0, 0, 0, 0.1);
+    
+    /* Typography */
+    --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    /* Spacing Scale */
+    --space-xs: 8px;
+    --space-sm: 12px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    
+    /* Animation Timings */
+    --timing-fast: 120ms;
+    --timing-base: 180ms;
+    --timing-slow: 300ms;
+    --easing: cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Border Radius */
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+}
+
+/* ========================================
+   RESET & BASE
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    font-family: var(--font-system);
+    font-weight: var(--font-weight-regular);
+    color: var(--color-primary);
+    background: var(--color-background);
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+
+/* ========================================
+   LAYOUT
+   ======================================== */
+
+.app-container {
+    min-height: 100vh;
+    min-height: 100dvh;
+    position: relative;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.main-content {
+    opacity: 0;
+    transition: opacity var(--timing-slow) var(--easing);
+}
+
+.app-container[data-state="ready"] .main-content,
+.app-container[data-state="ar"] .main-content,
+.app-container[data-state="photo"] .main-content {
+    opacity: 1;
+}
+
+/* ========================================
+   GLASSMORPHISM - PREMIUM VERSION
+   ======================================== */
+
+.glass {
+    background: rgba(255, 255, 255, var(--glass-opacity));
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Dark mode glass (para photo mode) */
+.glass-dark {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ========================================
+   3D VIEWER SECTION
+   ======================================== */
+
+.viewer-section {
+    width: 100%;
+    height: 60vh;
+    min-height: 400px;
+    max-height: 600px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg);
+}
+
+.model-viewer {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+/* Progress Bar */
+.progress-container {
+    position: absolute;
+    bottom: var(--space-lg);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--color-accent);
+    width: 0%;
+    transition: width var(--timing-base) linear;
+}
+
+/* ========================================
+   AR BUTTON - PREMIUM STYLE
+   ======================================== */
+
+.ar-button {
+    position: absolute;
+    bottom: var(--space-xl);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--space-md) var(--space-xl);
+    border: none;
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    
+    font-family: var(--font-system);
+    font-size: 17px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+    
+    transition: all var(--timing-base) var(--easing);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.ar-button.ready {
+    opacity: 1;
+    pointer-events: auto;
+    animation: slideUp var(--timing-slow) var(--easing);
+}
+
+.ar-button:hover {
+    transform: translateX(-50%) scale(1.02);
+}
+
+.ar-button:active {
+    transform: translateX(-50%) scale(0.98);
+}
+
+.ar-button svg {
+    width: 24px;
+    height: 24px;
+    transition: transform var(--timing-base) var(--easing);
+}
+
+.ar-button:hover svg {
+    transform: rotate(15deg);
+}
+
+/* ========================================
+   AR STATUS INDICATOR
+   ======================================== */
+
+.ar-status {
+    position: absolute;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    
+    font-size: 14px;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-primary);
+    
+    animation: slideDown var(--timing-slow) var(--easing);
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-success);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* ========================================
+   CONTENT SECTION
+   ======================================== */
+
+.content-section {
+    padding: var(--space-xl) var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   CARDS - PREMIUM STYLE
+   ======================================== */
+
+.card {
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    transition: transform var(--timing-base) var(--easing);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card-header {
+    margin-bottom: var(--space-md);
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.card-description {
+    font-size: 15px;
+    color: var(--color-tertiary);
+    line-height: 1.6;
+}
+
+.product-title {
+    font-size: 32px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: var(--space-xs);
+}
+
+.product-subtitle {
+    font-size: 17px;
+    color: var(--color-tertiary);
+    font-weight: var(--font-weight-medium);
+}
+
+.product-description {
+    font-size: 17px;
+    color: var(--color-secondary);
+    line-height: 1.6;
+}
+
+/* ========================================
+   INSTRUCTIONS LIST
+   ======================================== */
+
+.instructions-list {
+    list-style: none;
+    counter-reset: instruction-counter;
+}
+
+.instructions-list li {
+    counter-increment: instruction-counter;
+    position: relative;
+    padding-left: var(--space-xl);
+    margin-bottom: var(--space-sm);
+    font-size: 15px;
+    color: var(--color-secondary);
+}
+
+.instructions-list li::before {
+    content: counter(instruction-counter);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: var(--font-weight-semibold);
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+.btn-primary,
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-system);
+    font-size: 15px;
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: all var(--timing-base) var(--easing);
+}
+
+.btn-primary {
+    background: var(--color-accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0077ed;
+    transform: scale(1.02);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-secondary {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--color-primary);
+}
+
+.btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+/* ========================================
+   LOADING STATE
+   ======================================== */
+
+.loading-state {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl);
+    z-index: 100;
+    transition: opacity var(--timing-slow) var(--easing);
+}
+
+.app-container[data-state="ready"] .loading-state,
+.app-container[data-state="ar"] .loading-state,
+.app-container[data-state="photo"] .loading-state {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-card {
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    text-align: center;
+    animation: fadeIn var(--timing-slow) var(--easing);
+}
+
+.loading-skeleton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.skeleton-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.06) 25%,
+        rgba(0, 0, 0, 0.12) 50%,
+        rgba(0, 0, 0, 0.06) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.skeleton-lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.skeleton-line {
+    height: 16px;
+    border-radius: 8px;
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.06) 25%,
+        rgba(0, 0, 0, 0.12) 50%,
+        rgba(0, 0, 0, 0.06) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.skeleton-line.short {
+    width: 60%;
+}
+
+.loading-text {
+    font-size: 15px;
+    color: var(--color-tertiary);
+    font-weight: var(--font-weight-medium);
+}
+
+/* ========================================
+   PHOTO MODE
+   ======================================== */
+
+.photo-background {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity var(--timing-slow) var(--easing);
+}
+
+.app-container[data-state="photo"] .photo-background {
+    opacity: 1;
+}
+
+.photo-mode-ui {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-xl);
+}
+
+.camera-stream {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+.photo-mode-controls {
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    display: flex;
+    gap: var(--space-md);
+    margin-top: auto;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.fade-in {
+    animation: fadeIn var(--timing-slow) var(--easing both;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .viewer-section {
+        height: 50vh;
+        min-height: 300px;
+    }
+    
+    .product-title {
+        font-size: 28px;
+    }
+    
+    .content-section {
+        padding: var(--space-lg) var(--space-md);
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --space-lg: 16px;
+        --space-xl: 24px;
+        --space-2xl: 32px;
+    }
+    
+    .product-title {
+        font-size: 24px;
+    }
+    
+    .ar-button {
+        font-size: 15px;
+        padding: var(--space-sm) var(--space-lg);
+    }
+}
+
+/* ========================================
+   DARK MODE SUPPORT (optional)
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-primary: #f5f5f7;
+        --color-secondary: #d2d2d7;
+        --color-tertiary: #86868b;
+        --color-background: #000000;
+        --glass-opacity: 0.08;
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+    
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+}
