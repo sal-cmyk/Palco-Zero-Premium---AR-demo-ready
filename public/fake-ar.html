@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEON FLOW - AR Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000;
+        }
+
+        /* Camera feed */
+        #camera-feed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        /* AR Container */
+        #ar-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Shadow */
+        #shadow {
+            position: absolute;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 60px;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 30%, transparent 70%);
+            filter: blur(8px);
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* Product can */
+        #product-can {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            height: auto;
+            pointer-events: all;
+            cursor: grab;
+            transition: transform 0.1s ease-out;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.4));
+        }
+
+        #product-can:active {
+            cursor: grabbing;
+        }
+
+        /* iOS Quick Look UI Clone */
+        .ar-ui {
+            position: absolute;
+            z-index: 10;
+            pointer-events: all;
+        }
+
+        /* Close button */
+        .close-btn {
+            top: 20px;
+            left: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+            border: none;
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .close-btn:active {
+            background: rgba(0,0,0,0.8);
+        }
+
+        /* Share button */
+        .share-btn {
+            top: 20px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+            border: none;
+            color: white;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .share-btn:active {
+            background: rgba(0,0,0,0.8);
+        }
+
+        /* Instructions */
+        .instructions {
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(20px);
+            padding: 12px 24px;
+            border-radius: 20px;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            opacity: 1;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .instructions.hidden {
+            opacity: 0;
+        }
+
+        /* Loading overlay */
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            color: white;
+            font-size: 16px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Subtle tracking jitter effect */
+        @keyframes subtle-jitter {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            25% { transform: translate(-50.2%, -49.8%) rotate(0.3deg) scale(1.001); }
+            50% { transform: translate(-49.8%, -50.1%) rotate(-0.2deg) scale(0.999); }
+            75% { transform: translate(-50.1%, -49.9%) rotate(0.1deg) scale(1.001); }
+        }
+
+        .tracking-active {
+            animation: subtle-jitter 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading screen -->
+    <div id="loading">
+        <div class="spinner"></div>
+        <p>Iniciando AR...</p>
+    </div>
+
+    <!-- Camera feed -->
+    <video id="camera-feed" autoplay playsinline></video>
+
+    <!-- AR Container -->
+    <div id="ar-container">
+        <div id="shadow"></div>
+        <img id="product-can" src="assets/can/ar-overlay-can-front.png" alt="NEON FLOW">
+    </div>
+
+    <!-- Quick Look UI -->
+    <button class="ar-ui close-btn" onclick="closeAR()">✕</button>
+    <button class="ar-ui share-btn" onclick="shareAR()">↗</button>
+    <div class="ar-ui instructions">
+        Arraste para girar • Pinça para aumentar
+    </div>
+
+    <script>
+        let rotation = 0;
+        let scale = 1;
+        let isDragging = false;
+        let startX = 0;
+        let currentRotation = 0;
+        let instructionsTimeout;
+
+        const can = document.getElementById('product-can');
+        const instructions = document.querySelector('.instructions');
+        const loading = document.getElementById('loading');
+        const cameraFeed = document.getElementById('camera-feed');
+
+        // Initialize camera
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    }
+                });
+                cameraFeed.srcObject = stream;
+                
+                // Wait for video to be ready
+                cameraFeed.onloadedmetadata = () => {
+                    setTimeout(() => {
+                        loading.style.display = 'none';
+                        can.classList.add('tracking-active');
+                        hideInstructionsAfterDelay();
+                    }, 800);
+                };
+            } catch (err) {
+                console.error('Camera error:', err);
+                loading.innerHTML = '<p>Erro ao acessar câmera</p><p style="font-size:12px;margin-top:10px;">Permita o acesso à câmera</p>';
+            }
+        }
+
+        // Touch/Mouse handlers for rotation
+        can.addEventListener('touchstart', handleStart);
+        can.addEventListener('mousedown', handleStart);
+        
+        document.addEventListener('touchmove', handleMove);
+        document.addEventListener('mousemove', handleMove);
+        
+        document.addEventListener('touchend', handleEnd);
+        document.addEventListener('mouseup', handleEnd);
+
+        function handleStart(e) {
+            isDragging = true;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            startX = clientX;
+            currentRotation = rotation;
+            can.style.cursor = 'grabbing';
+            showInstructions();
+        }
+
+        function handleMove(e) {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const deltaX = clientX - startX;
+            
+            // Rotate based on drag distance
+            rotation = currentRotation + (deltaX * 0.5);
+            
+            // Switch image based on rotation angle
+            const normalizedRotation = ((rotation % 360) + 360) % 360;
+            
+            if (normalizedRotation > 45 && normalizedRotation < 135) {
+                can.src = 'assets/can/ar-overlay-can-angle.png';
+            } else if (normalizedRotation > 135 && normalizedRotation < 225) {
+                can.src = 'assets/can/ar-overlay-can-front.png';
+                can.style.transform = `translate(-50%, -50%) scaleX(-1) scale(${scale})`;
+                return;
+            } else if (normalizedRotation > 225 && normalizedRotation < 315) {
+                can.src = 'assets/can/ar-overlay-can-angle.png';
+                can.style.transform = `translate(-50%, -50%) scaleX(-1) scale(${scale})`;
+                return;
+            } else {
+                can.src = 'assets/can/ar-overlay-can-front.png';
+            }
+            
+            can.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        }
+
+        function handleEnd() {
+            isDragging = false;
+            can.style.cursor = 'grab';
+            hideInstructionsAfterDelay();
+        }
+
+        // Pinch zoom for touch devices
+        let initialDistance = 0;
+        let initialScale = 1;
+
+        can.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                initialDistance = getDistance(e.touches[0], e.touches[1]);
+                initialScale = scale;
+            }
+        });
+
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const currentDistance = getDistance(e.touches[0], e.touches[1]);
+                scale = initialScale * (currentDistance / initialDistance);
+                scale = Math.max(0.5, Math.min(scale, 2.5)); // Limit scale
+                can.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                showInstructions();
+            }
+        });
+
+        function getDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        // UI functions
+        function closeAR() {
+            if (cameraFeed.srcObject) {
+                cameraFeed.srcObject.getTracks().forEach(track => track.stop());
+            }
+            window.history.back();
+        }
+
+        function shareAR() {
+            alert('Compartilhar funcionalidade em breve!');
+        }
+
+        function showInstructions() {
+            instructions.classList.remove('hidden');
+            clearTimeout(instructionsTimeout);
+        }
+
+        function hideInstructionsAfterDelay() {
+            instructionsTimeout = setTimeout(() => {
+                instructions.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Initialize on load
+        initCamera();
+    </script>
+</body>
+</html>

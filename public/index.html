@@ -291,23 +291,28 @@
             loadingOverlay.innerHTML = '<p style="color: #ff4444;">Erro ao carregar modelo 3D</p>';
         });
         
-        // Track AR button clicks
-        viewer.addEventListener('ar-status', (event) => {
-            if (event.detail.status === 'session-started') {
-                console.log('✓ AR session started');
-                
-                // Track event (mock)
-                fetch('/track', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        event: 'ar_session_started',
-                        sku: 'can',
-                        timestamp: new Date().toISOString()
-                    })
-                }).catch(() => {}); // Silent fail for mock endpoint
+        // Intercept AR button clicks and redirect to fake AR
+        viewer.addEventListener('click', (event) => {
+            // Check if AR button was clicked
+            const arButton = viewer.shadowRoot.querySelector('button[slot="ar-button"]') || 
+                           viewer.shadowRoot.querySelector('.ar-button');
+            
+            if (event.target.closest('[slot="ar-button"]') || 
+                event.composedPath().some(el => el.classList && el.classList.contains('ar-button'))) {
+                event.preventDefault();
+                event.stopPropagation();
+                window.location.href = 'fake-ar.html';
+                return false;
             }
-        });
+        }, true);
+        
+        // Also intercept the default AR activation
+        viewer.addEventListener('ar-status', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            window.location.href = 'fake-ar.html';
+            return false;
+        }, true);
         
         // Log when viewer is ready
         viewer.addEventListener('model-visibility', (event) => {
