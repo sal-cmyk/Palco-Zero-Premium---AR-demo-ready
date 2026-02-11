@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Palco 0 — HACKTHEPACK</title>
     
     <!-- Model Viewer -->
@@ -13,6 +13,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -98,20 +99,31 @@
         }
         
         model-viewer::part(default-ar-button) {
+            display: none !important;
+        }
+        
+        /* Custom AR Button */
+        .custom-ar-button {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
             color: white;
             border: none;
             border-radius: 12px;
-            padding: 12px 24px;
+            padding: 14px 32px;
             font-weight: 600;
             font-size: 1rem;
-            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.4);
+            cursor: pointer;
             transition: all 0.3s ease;
+            z-index: 100;
         }
         
-        model-viewer::part(default-ar-button):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(0, 212, 255, 0.5);
+        .custom-ar-button:active {
+            transform: translateX(-50%) translateY(2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
         }
         
         /* Instructions */
@@ -190,6 +202,184 @@
             to { transform: rotate(360deg); }
         }
         
+        /* ===== FAKE AR MODAL ===== */
+        #ar-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 10000;
+            display: none;
+            overflow: hidden;
+        }
+        
+        #ar-modal.active {
+            display: block;
+        }
+        
+        #camera-feed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        
+        #ar-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        #shadow {
+            position: absolute;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 60px;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 30%, transparent 70%);
+            filter: blur(8px);
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        #product-can {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            height: auto;
+            pointer-events: all;
+            cursor: grab;
+            transition: transform 0.1s ease-out;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.4));
+        }
+        
+        #product-can:active {
+            cursor: grabbing;
+        }
+        
+        .ar-ui {
+            position: absolute;
+            z-index: 10;
+            pointer-events: all;
+        }
+        
+        .close-btn {
+            top: 20px;
+            left: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+            border: none;
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .close-btn:active {
+            background: rgba(0,0,0,0.8);
+        }
+        
+        .share-btn {
+            top: 20px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+            border: none;
+            color: white;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .share-btn:active {
+            background: rgba(0,0,0,0.8);
+        }
+        
+        .ar-instructions {
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(20px);
+            padding: 12px 24px;
+            border-radius: 20px;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            opacity: 1;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .ar-instructions.hidden {
+            opacity: 0;
+        }
+        
+        #ar-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            color: white;
+            font-size: 16px;
+        }
+        
+        #ar-loading.hidden {
+            display: none;
+        }
+        
+        .ar-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes subtle-jitter {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            25% { transform: translate(-50.2%, -49.8%) rotate(0.3deg) scale(1.001); }
+            50% { transform: translate(-49.8%, -50.1%) rotate(-0.2deg) scale(0.999); }
+            75% { transform: translate(-50.1%, -49.9%) rotate(0.1deg) scale(1.001); }
+        }
+        
+        .tracking-active {
+            animation: subtle-jitter 3s ease-in-out infinite;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .product-title h1 {
@@ -225,12 +415,8 @@
             <model-viewer
                 id="productViewer"
                 src="./assets/can/product.glb"
-                ios-src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663242626684/aslIbjntZKgYxoNG.usdz"
                 poster="./assets/can/poster.webp"
                 alt="NEON FLOW Energy Drink Can"
-                ar
-                ar-modes="scene-viewer quick-look"
-                ar-scale="auto"
                 camera-controls
                 touch-action="pan-y"
                 loading="eager"
@@ -242,8 +428,9 @@
                 min-camera-orbit="auto auto 50%"
                 max-camera-orbit="auto auto 200%"
             >
-                <!-- AR Button will appear automatically on supported devices -->
             </model-viewer>
+            
+            <button class="custom-ar-button" id="arButton">Ver em AR</button>
         </div>
         
         <div class="instructions">
@@ -268,10 +455,38 @@
         </div>
     </main>
     
+    <!-- AR Modal -->
+    <div id="ar-modal">
+        <div id="ar-loading">
+            <div class="ar-spinner"></div>
+            <p>Iniciando AR...</p>
+        </div>
+        
+        <video id="camera-feed" autoplay playsinline></video>
+        
+        <div id="ar-container">
+            <div id="shadow"></div>
+            <img id="product-can" src="assets/can/ar-overlay-can-front.png" alt="NEON FLOW">
+        </div>
+        
+        <button class="ar-ui close-btn" id="closeAR">✕</button>
+        <button class="ar-ui share-btn">↗</button>
+        <div class="ar-ui ar-instructions">
+            Arraste para girar • Pinça para aumentar
+        </div>
+    </div>
+    
     <script>
         // Model Viewer Management
         const viewer = document.getElementById('productViewer');
         const loadingOverlay = document.getElementById('loadingOverlay');
+        const arButton = document.getElementById('arButton');
+        const arModal = document.getElementById('ar-modal');
+        const arLoading = document.getElementById('ar-loading');
+        const cameraFeed = document.getElementById('camera-feed');
+        const can = document.getElementById('product-can');
+        const closeARBtn = document.getElementById('closeAR');
+        const arInstructions = document.querySelector('.ar-instructions');
         
         // Hide loading overlay when model is loaded
         viewer.addEventListener('load', () => {
@@ -291,41 +506,149 @@
             loadingOverlay.innerHTML = '<p style="color: #ff4444;">Erro ao carregar modelo 3D</p>';
         });
         
-        // Intercept AR button clicks and redirect to fake AR
-        viewer.addEventListener('click', (event) => {
-            // Check if AR button was clicked
-            const arButton = viewer.shadowRoot.querySelector('button[slot="ar-button"]') || 
-                           viewer.shadowRoot.querySelector('.ar-button');
-            
-            if (event.target.closest('[slot="ar-button"]') || 
-                event.composedPath().some(el => el.classList && el.classList.contains('ar-button'))) {
-                event.preventDefault();
-                event.stopPropagation();
-                window.location.href = 'fake-ar.html';
-                return false;
+        // ===== FAKE AR LOGIC =====
+        let rotation = 0;
+        let scale = 1;
+        let isDragging = false;
+        let startX = 0;
+        let currentRotation = 0;
+        let instructionsTimeout;
+        let cameraStream = null;
+        
+        // Open AR Modal
+        arButton.addEventListener('click', async () => {
+            arModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            await initCamera();
+        });
+        
+        // Close AR Modal
+        closeARBtn.addEventListener('click', closeAR);
+        
+        function closeAR() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
             }
-        }, true);
+            arModal.classList.remove('active');
+            document.body.style.overflow = '';
+            arLoading.classList.remove('hidden');
+        }
         
-        // Also intercept the default AR activation
-        viewer.addEventListener('ar-status', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            window.location.href = 'fake-ar.html';
-            return false;
-        }, true);
+        // Initialize camera
+        async function initCamera() {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    }
+                });
+                cameraFeed.srcObject = cameraStream;
+                
+                cameraFeed.onloadedmetadata = () => {
+                    setTimeout(() => {
+                        arLoading.classList.add('hidden');
+                        can.classList.add('tracking-active');
+                        hideInstructionsAfterDelay();
+                    }, 800);
+                };
+            } catch (err) {
+                console.error('Camera error:', err);
+                arLoading.innerHTML = '<p>Erro ao acessar câmera</p><p style="font-size:12px;margin-top:10px;">Permita o acesso à câmera</p>';
+            }
+        }
         
-        // Log when viewer is ready
-        viewer.addEventListener('model-visibility', (event) => {
-            if (event.detail.visible) {
-                console.log('✓ Model is now visible');
+        // Touch/Mouse handlers
+        can.addEventListener('touchstart', handleStart);
+        can.addEventListener('mousedown', handleStart);
+        document.addEventListener('touchmove', handleMove);
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('touchend', handleEnd);
+        document.addEventListener('mouseup', handleEnd);
+        
+        function handleStart(e) {
+            isDragging = true;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            startX = clientX;
+            currentRotation = rotation;
+            can.style.cursor = 'grabbing';
+            showInstructions();
+        }
+        
+        function handleMove(e) {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const deltaX = clientX - startX;
+            
+            rotation = currentRotation + (deltaX * 0.5);
+            
+            const normalizedRotation = ((rotation % 360) + 360) % 360;
+            
+            if (normalizedRotation > 45 && normalizedRotation < 135) {
+                can.src = 'assets/can/ar-overlay-can-angle.png';
+            } else if (normalizedRotation > 135 && normalizedRotation < 225) {
+                can.src = 'assets/can/ar-overlay-can-front.png';
+                can.style.transform = `translate(-50%, -50%) scaleX(-1) scale(${scale})`;
+                return;
+            } else if (normalizedRotation > 225 && normalizedRotation < 315) {
+                can.src = 'assets/can/ar-overlay-can-angle.png';
+                can.style.transform = `translate(-50%, -50%) scaleX(-1) scale(${scale})`;
+                return;
+            } else {
+                can.src = 'assets/can/ar-overlay-can-front.png';
+            }
+            
+            can.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        }
+        
+        function handleEnd() {
+            isDragging = false;
+            can.style.cursor = 'grab';
+            hideInstructionsAfterDelay();
+        }
+        
+        // Pinch zoom
+        let initialDistance = 0;
+        let initialScale = 1;
+        
+        can.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                initialDistance = getDistance(e.touches[0], e.touches[1]);
+                initialScale = scale;
             }
         });
         
-        // Check AR availability
-        if (viewer.canActivateAR) {
-            console.log('✓ AR is available on this device');
-        } else {
-            console.log('ℹ AR not available (desktop or unsupported browser)');
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const currentDistance = getDistance(e.touches[0], e.touches[1]);
+                scale = initialScale * (currentDistance / initialDistance);
+                scale = Math.max(0.5, Math.min(scale, 2.5));
+                can.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                showInstructions();
+            }
+        });
+        
+        function getDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+        
+        function showInstructions() {
+            arInstructions.classList.remove('hidden');
+            clearTimeout(instructionsTimeout);
+        }
+        
+        function hideInstructionsAfterDelay() {
+            instructionsTimeout = setTimeout(() => {
+                arInstructions.classList.add('hidden');
+            }, 3000);
         }
     </script>
 </body>
